@@ -27,6 +27,10 @@ int Neuron::getID() {
     return ID;
 }
 
+void Neuron::resetV(){
+    v = vrest;
+}
+
 // Receive input from synapse
 void Neuron::receiveInput(float weight){
     this->I += weight * samplespms;

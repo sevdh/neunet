@@ -7,10 +7,19 @@ Synapse::Synapse(int preSynID, int postSynID, bool ExcInh, int ID, float weight,
     this->ID = ID;
     this->net = net;
     this->settings = settings;
+    this->delayTime = delayTime;
+    this->weight = weight;
+    
+    if (ExcInh){
+        weight = 7.0;
+        delayTime = round((1 + (randomMax(D-1))) * samplespms);
+    }
+    else{
+        delayTime = round((1 + (randomMax(D-1))) * samplespms);
+        weight = -5.0;
+    }
     
     reset();    // Init synapse
-    this->weight = weight;
-    this->delayTime = delayTime;
     resetDisplay();
 }
 
@@ -27,19 +36,33 @@ void Synapse::reset(){
     postDelta = 0;
     deltaT = 0;
     WCR = 0.0;
-    
+    spiked = false;
+    weightDerivative = 0.0;
+    delVecSize = 0;
+    delay.clear();
+}
+
+void Synapse::resetDelays(){
+    preFirstSpike = false;
+    preCounter = 0;
+    postFirstSpike = false;
+    postCounter = std::numeric_limits<unsigned long>::max();
+    preDelta = 0;
+    postDelta = 0;
+    deltaT = 0;
+    WCR = 0.0;
     spiked = false;
     weightDerivative = 0.0;
     delVecSize = 0;
     delay.clear();
     
     if (ExcInh){
-        weight = 7.0;
+        //weight = 7.0;
         delayTime = round((1 + (randomMax(D-1))) * samplespms);
     }
     else{
-        delayTime = round((1 + (randomMax(D-1))) * samplespms);
-        weight = -5.0;
+        delayTime = samplespms;
+        //weight = -5.0;
     }
 }
 

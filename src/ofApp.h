@@ -28,6 +28,7 @@ public:
     
     void clearButtonPressed();
     void ResetSynapseButtonPressed();
+    void ResetDelaysButtonPressed();
     void setPresetButtonPressed();
     void getPresetButtonPressed();
     void deleteNeuron(int ID);
@@ -48,12 +49,14 @@ private:
     ofxPanel gui;
     ofxButton Clear;
     ofxButton ResetSynapse;
+    ofxButton resetDelays;
     ofxButton setPreset;
     ofxButton getPreset;
     ofParameter<float> WCR;
     ofParameter<bool> outputAll;
     ofParameter<bool> onlySpike;
-    ofParameter<bool> noise;
+    ofParameter<float> noise;
+    ofParameter<float> noiseLvl;
     ofxXmlSettings settings;
     string preset;
     

@@ -25,6 +25,7 @@ public:
     ~Synapse();
     
     void reset();
+    void resetDelays();
     void preSpike();
     int getTimePassed();
     

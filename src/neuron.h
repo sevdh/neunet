@@ -43,6 +43,7 @@ public:
     bool getType();
     void setID(int ID);
     int getID();
+    void resetV();
     
     void display();
     int checkClick(ofVec2f loc);

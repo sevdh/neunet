@@ -19,20 +19,22 @@ void ofApp::setup(){
     gui.setup();
     Clear.addListener(this, &ofApp::clearButtonPressed);
     ResetSynapse.addListener(this, &ofApp::ResetSynapseButtonPressed);
+    resetDelays.addListener(this, &ofApp::ResetDelaysButtonPressed);
     setPreset.addListener(this, &ofApp::setPresetButtonPressed);
     getPreset.addListener(this, &ofApp::getPresetButtonPressed);
 
     gui.add(outputAll.set("All -> audio out", false));
     gui.add(onlySpike.set("Only spike", false));
-    gui.add(noise.set("Noise", false));
+    gui.add(noise.set("Noise", 0,0,10.0));
     gui.add(WCR.set("Weight Change Rate", 0,0,1.0));
-    gui.add(Clear.setup("Clear"));
     gui.add(ResetSynapse.setup("Reset synapse"));
+    gui.add(resetDelays.setup("Reset Delays"));
+    gui.add(Clear.setup("Clear"));
     gui.add(setPreset.setup("Save settings"));
     gui.add(getPreset.setup("Get settings"));
     gui.setPosition(ofGetWidth()-gui.getWidth()-5, 5);
     gui.minimizeAll();
-    preset = "settings.xml";
+    preset = "preset.xml";                                                            //***PRESET NAME***
     
     leftMouseHold = false;
     clickedOnSynapse = false;
@@ -41,12 +43,12 @@ void ofApp::setup(){
     clickedOnOutput = false;
     
     // Setup audio
-    //soundStream.listDevices();
+    soundStream.printDeviceList();
     soundStream.setInDeviceID(4);
-    soundStream.setOutDeviceID(2);
-    volume = 0.9f;
+    soundStream.setOutDeviceID(8);
+    volume = 0.05f;                                                                      //***VOLUME SCALING****
     inputBuffer.assign(BUFFERSIZE * INPUTCHANNELS, 0.0);
-    soundStream.setup(this, OUTPUTCHANNELS+0, INPUTCHANNELS, SAMPLERATE, BUFFERSIZE, 2);
+    soundStream.setup(this, OUTPUTCHANNELS+CHANNELOFFSET, INPUTCHANNELS, SAMPLERATE, BUFFERSIZE, 2);
     noiseConstant = 0.03*powf(speed,0.5);
     
     //create();
@@ -82,6 +84,7 @@ void ofApp::exit() {
     gui.clear();
     Clear.removeListener(this,&ofApp::ResetSynapseButtonPressed);
     ResetSynapse.removeListener(this,&ofApp::ResetSynapseButtonPressed);
+    resetDelays.removeListener(this,&ofApp::ResetDelaysButtonPressed);
     setPreset.removeListener(this,&ofApp::setPresetButtonPressed);
     getPreset.removeListener(this,&ofApp::getPresetButtonPressed);
 }
@@ -101,8 +104,8 @@ void ofApp::audioOut(float * output, int bufferSize, int nChannels){
         // Noise input to network
         if(noise.get() && N != 0) {
             int randNeuron = randomMax(N);
-            if(net[randNeuron].getType()) net[randNeuron].receiveInput(randomMax(N * noiseConstant));
-            else net[randNeuron].receiveInput(randomMax(N * 0.3f * noiseConstant));
+            if(net[randNeuron].getType()) net[randNeuron].receiveInput(randomMax(N * noiseConstant )* noise.get());
+            else net[randNeuron].receiveInput(randomMax(N * 0.3f * noiseConstant)* noise.get());
         }
         
         // Neurons
@@ -168,7 +171,7 @@ void ofApp::audioOut(float * output, int bufferSize, int nChannels){
             }
         }
         for (int k=0; k<OUTPUTCHANNELS; ++k) {
-            output[i * (OUTPUTCHANNELS+0)+k+0] = DCf[k].filter(signal[k]) * volume;
+            output[i * (OUTPUTCHANNELS+CHANNELOFFSET)+k+CHANNELOFFSET] = DCf[k].filter(signal[k]) * volume;
         }
     }// for i < buffersize
 }
@@ -507,9 +510,14 @@ void ofApp::clearButtonPressed() {
 
 //--------------------------------------------------------------
 void ofApp::ResetSynapseButtonPressed() {
-    for (int i = 0; i < S; ++i)
-        synapses[i].reset();
+    for (int i = 0; i < S; ++i) synapses[i].reset();
+    for (int i = 0; i < N; ++i) net[i].resetV();
 }
+
+void ofApp::ResetDelaysButtonPressed() {
+    for (int i = 0; i < S; ++i) synapses[i].resetDelays();
+}
+
 
 //--------------------------------------------------------------
 void ofApp::create() {

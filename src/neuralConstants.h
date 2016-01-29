@@ -5,17 +5,18 @@
 #define OUTPUTCHANNELS 2
 #define SAMPLERATE 48000
 #define BUFFERSIZE 1024
+#define CHANNELOFFSET 2
 
 #include "math.h"
 #include "ofMain.h"
 
 // Global constants
-const float speed = 1.0/16.0;
+const float speed = 1.0;                       // Slow down or speed up. <0 is slower >0 is faster
 const float samplespms = SAMPLERATE/1000.0/speed;   // Number of samples per ms
 const float tau = (1.0/samplespms);                 // Timescale
 const float neuronResponseTime = 1.85 * samplespms;  // Charge time of neuron
 
-const int D  = 20;                                  // Maximal axonal conduction delay in ms
+const int D  = 100;                                  // Maximal axonal conduction delay in ms ****
 const float	sm = 20.0;                              // Maximal synaptic strength
 
 const float vrest = -65.0;                          // Resting potential
